@@ -14,7 +14,17 @@ const PORT = process.env.PORT || 5000;
 
 // Serve uploaded files — local dev only (production uses Vercel Blob URLs)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(cors());
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+
+app.use('/', (req, res, next) => {
+  console.log('Requete recue sur /');
+  res.send('Hello World!');
+  next();
+});
 // Connexion à MongoDB
 // mongoose.connect(process.env.MONGO_URI, {}).then(() => console.log("MongoDB connecté")).catch(err => console.log(err));
 
