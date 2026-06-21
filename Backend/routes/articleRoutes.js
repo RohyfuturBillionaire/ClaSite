@@ -12,14 +12,25 @@ const authorize = require('../middleware/authorize');
 // Guard for write operations (admin or 'produits' permission). GETs stay public.
 const canEdit = [authenticateToken, authorize('produits')];
 
+// tailles can arrive as an array or a comma-separated string (multipart form)
+function parseTailles(t) {
+  if (!t) return [];
+  if (Array.isArray(t)) return t.map(s => String(s).trim()).filter(Boolean);
+  return String(t).split(',').map(s => s.trim()).filter(Boolean);
+}
+
 // ========== ARTICLES ==========
 
 // Create article (multipart — images uploaded as files)
 router.post('/', canEdit, upload.array('images', 10), async (req, res) => {
   try {
-    const { nom, description, id_categorie_article, prix, id_boutique, stock, seuil_alerte } = req.body;
+    const { nom, description, id_categorie_article, prix, id_boutique, stock, seuil_alerte, genre, tailles } = req.body;
 
-    const article = new Article({ nom, description, id_categorie_article, prix, id_boutique });
+    const article = new Article({
+      nom, description, prix, id_boutique, genre,
+      id_categorie_article: id_categorie_article || undefined,
+      tailles: parseTailles(tailles)
+    });
     await article.save();
 
     if (stock !== undefined) {
@@ -146,11 +157,16 @@ router.get('/:id', async (req, res) => {
 // Update article (multipart — new images replace existing ones)
 router.put('/:id', canEdit, upload.array('images', 10), async (req, res) => {
   try {
-    const { nom, description, id_categorie_article, prix, stock, seuil_alerte } = req.body;
+    const { nom, description, id_categorie_article, prix, stock, seuil_alerte, genre, tailles } = req.body;
+
+    const updates = { nom, description, prix };
+    if (id_categorie_article !== undefined) updates.id_categorie_article = id_categorie_article || null;
+    if (genre !== undefined) updates.genre = genre;
+    if (tailles !== undefined) updates.tailles = parseTailles(tailles);
 
     const article = await Article.findByIdAndUpdate(
       req.params.id,
-      { nom, description, id_categorie_article, prix },
+      updates,
       { new: true, runValidators: true }
     );
 

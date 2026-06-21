@@ -20,6 +20,7 @@ app.get('/', (req, res) => {
 });
 
 // API routes
+app.use('/api/public', require('./routes/publicRoutes')); // client storefront (no auth)
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/roles', require('./routes/roleRoutes'));

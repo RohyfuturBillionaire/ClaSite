@@ -5,6 +5,8 @@ const ArticleSchema = new mongoose.Schema({
   description: { type: String },
   id_categorie_article: { type: mongoose.Schema.Types.ObjectId, ref: 'CategorieArticle' },
   prix: { type: Number, required: true },
+  genre: { type: String, enum: ['femme', 'homme', 'mixte', 'enfant'], default: 'mixte' },
+  tailles: [{ type: String }], // ex: ['S', 'M', 'L', 'XL']
   id_boutique: { type: mongoose.Schema.Types.ObjectId, ref: 'Boutique', required: true },
   id_collection: { type: mongoose.Schema.Types.ObjectId, ref: 'Collection' },
   actif: { type: Boolean, default: true }
