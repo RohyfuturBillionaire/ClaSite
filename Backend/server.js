@@ -25,6 +25,13 @@ app.use('/', (req, res, next) => {
   res.send('Hello World!');
   next();
 });
+
+app.use('/api/articles', require('./routes/articleRoutes'));
+app.use('/api/categories', require('./routes/categorieRoutes'));
+app.use('/api/collections', require('./routes/collectionRoutes'));
+app.use('/api/boutiques', require('./routes/boutiqueRoutes'));
+// app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 // Connexion à MongoDB
 // mongoose.connect(process.env.MONGO_URI, {}).then(() => console.log("MongoDB connecté")).catch(err => console.log(err));
 
