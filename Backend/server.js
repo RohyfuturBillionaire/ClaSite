@@ -1,64 +1,11 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const path = require('path');
 require('dotenv').config();
+const app = require('./app');
+const connectDB = require('./config/db');
 
-const authenticateToken = require('./middleware/authMiddleware');
-
-const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-
-// Serve uploaded files — local dev only (production uses Vercel Blob URLs)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use(cors());
-app.use(cookieParser());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-
-app.use('/', (req, res, next) => {
-  console.log('Requete recue sur /');
-  res.send('Hello World!');
-  next();
-});
-
-app.use('/api/articles', require('./routes/articleRoutes'));
-app.use('/api/collections', require('./routes/collectionRoutes'));
-app.use('/api/boutiques', require('./routes/boutiqueRoutes'));
-// app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/users', require('./routes/userRoutes'));
-// Connexion à MongoDB
-// mongoose.connect(process.env.MONGO_URI, {}).then(() => console.log("MongoDB connecté")).catch(err => console.log(err));
-
-
-// Cron jobs
-// const cron = require('node-cron');
-// const { generateCurrentMonthPayments, checkOverduePayments } = require('./utils/paymentGenerator');
-
-// Verification quotidienne des retards a minuit
-// cron.schedule('0 0 * * *', async () => {
-//   try {
-//     const result = await checkOverduePayments();
-//     console.log(`[CRON] Verification retards: ${result.updated} paiements mis a jour`);
-//   } catch (error) {
-//     console.error('[CRON] Erreur verification retards:', error.message);
-//   }
-// });
-
-// Generation automatique le 1er de chaque mois a 1h du matin
-// cron.schedule('0 1 1 * *', async () => {
-//   try {
-//     const result = await generateCurrentMonthPayments();
-//     console.log(`[CRON] Generation mensuelle: ${result.created} crees, ${result.skipped} ignores`);
-//   } catch (error) {
-//     console.error('[CRON] Erreur generation mensuelle:', error.message);
-//   }
-// });
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });

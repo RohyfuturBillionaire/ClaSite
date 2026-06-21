@@ -6,11 +6,16 @@ const MouvementStock = require('../models/MouvementStock');
 const ImgArticle = require('../models/ImgArticle');
 const upload = require('../config/multer');
 const { uploadFile, deleteFile } = require('../config/blob');
+const authenticateToken = require('../middleware/authMiddleware');
+const authorize = require('../middleware/authorize');
+
+// Guard for write operations (admin or 'produits' permission). GETs stay public.
+const canEdit = [authenticateToken, authorize('produits')];
 
 // ========== ARTICLES ==========
 
 // Create article (multipart — images uploaded as files)
-router.post('/', upload.array('images', 10), async (req, res) => {
+router.post('/', canEdit, upload.array('images', 10), async (req, res) => {
   try {
     const { nom, description, id_categorie_article, prix, id_boutique, stock, seuil_alerte } = req.body;
 
@@ -139,7 +144,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update article (multipart — new images replace existing ones)
-router.put('/:id', upload.array('images', 10), async (req, res) => {
+router.put('/:id', canEdit, upload.array('images', 10), async (req, res) => {
   try {
     const { nom, description, id_categorie_article, prix, stock, seuil_alerte } = req.body;
 
@@ -201,7 +206,7 @@ router.put('/:id', upload.array('images', 10), async (req, res) => {
 });
 
 // Toggle article actif/inactif
-router.patch('/:id/toggle', async (req, res) => {
+router.patch('/:id/toggle', canEdit, async (req, res) => {
   try {
     const article = await Article.findById(req.params.id);
     if (!article) return res.status(404).json({ message: 'Article non trouvé' });
@@ -216,7 +221,7 @@ router.patch('/:id/toggle', async (req, res) => {
 });
 
 // Delete article (+ related stock movements and images)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', canEdit, async (req, res) => {
   try {
     const article = await Article.findByIdAndDelete(req.params.id);
     if (!article) return res.status(404).json({ message: 'Article non trouvé' });
@@ -247,7 +252,7 @@ router.get('/categories/boutique/:boutiqueId', async (req, res) => {
 });
 
 // Create category
-router.post('/categories', async (req, res) => {
+router.post('/categories', canEdit, async (req, res) => {
   try {
     const cat = new CategorieArticle(req.body);
     await cat.save();
@@ -258,7 +263,7 @@ router.post('/categories', async (req, res) => {
 });
 
 // Update category
-router.put('/categories/:id', async (req, res) => {
+router.put('/categories/:id', canEdit, async (req, res) => {
   try {
     const cat = await CategorieArticle.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!cat) return res.status(404).json({ message: 'Catégorie non trouvée' });
@@ -269,7 +274,7 @@ router.put('/categories/:id', async (req, res) => {
 });
 
 // Delete category
-router.delete('/categories/:id', async (req, res) => {
+router.delete('/categories/:id', canEdit, async (req, res) => {
   try {
     const cat = await CategorieArticle.findByIdAndDelete(req.params.id);
     if (!cat) return res.status(404).json({ message: 'Catégorie non trouvée' });
