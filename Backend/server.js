@@ -27,7 +27,6 @@ app.use('/', (req, res, next) => {
 });
 
 app.use('/api/articles', require('./routes/articleRoutes'));
-app.use('/api/categories', require('./routes/categorieRoutes'));
 app.use('/api/collections', require('./routes/collectionRoutes'));
 app.use('/api/boutiques', require('./routes/boutiqueRoutes'));
 // app.use('/api/auth', require('./routes/authRoutes'));

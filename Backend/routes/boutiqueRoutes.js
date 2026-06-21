@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Boutique = require('../models/Boutique');
-// const Local = require('../models/Local');
 const Article = require('../models/Article');
 const ImgArticle = require('../models/ImgArticle');
 const upload = require('../config/multer');
@@ -131,12 +130,7 @@ router.post('/', upload.single('logo'), async (req, res) => {
     }
     const boutique = new Boutique(data);
     await boutique.save();
-    
-    // If a local is assigned, set its status to false (occupied)
-    if (data.local_boutique) {
-      await Local.findByIdAndUpdate(data.local_boutique, { status: false });
-    }
-    
+
     const populated = await Boutique.findById(boutique._id)
       .populate('user_proprietaire', 'nom prenom email')
       .populate('id_categorie')
@@ -159,15 +153,6 @@ router.put('/:id', upload.single('logo'), async (req, res) => {
     if (req.file) {
       await deleteFile(currentBoutique.logo);
       data.logo = await uploadFile(req.file, 'boutiques');
-    }
-
-    // If local is changing, update statuses
-    const oldLocalId = currentBoutique.local_boutique?.toString();
-    const newLocalId = data.local_boutique;
-
-    if (oldLocalId !== newLocalId) {
-      if (oldLocalId) await Local.findByIdAndUpdate(oldLocalId, { status: true });
-      if (newLocalId) await Local.findByIdAndUpdate(newLocalId, { status: false });
     }
 
     const boutique = await Boutique.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true })
